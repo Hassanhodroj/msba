@@ -16,14 +16,19 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from streamlit_lottie import st_lottie
 import hydralit_components as hc
+import requests
+import tempfile
+from io import BytesIO
 
 st.set_page_config(layout="wide", page_title="Currency Analysis App")
 
 @st.cache(allow_output_mutation=True)
-def load_data(file_paths):
+def load_data(dropbox_urls):
     dataframes = []
-    for file_path in file_paths:
-        df = pd.read_excel(file_path, parse_dates=['DATE_TIME'])
+    for url in dropbox_urls:
+        r = requests.get(url)
+        excel_data = BytesIO(r.content)
+        df = pd.read_excel(excel_data, parse_dates=['DATE_TIME'])
         dataframes.append(df)
     return dataframes
 
@@ -38,33 +43,31 @@ def feature_engineering(df, pair):
     df['VOLATILITY'] = df['HIGH'] - df['LOW']
     return df
 
-# File paths of the 14 Excel files
-file_paths = [
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/AUDUSD-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/EURCHF-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/EURJPY-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/EURUSD-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/USDCAD-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/USDCHF-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/USDJPY-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/USDAUD-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/CHFEUR-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/JPYEUR-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/USDEUR-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/CADUSD-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/CHFUSD-2000-2020-15m.xlsx",
-    "/Users/hassan/Desktop/AUB/Masters/Capstone/data/JPYUSD-2000-2020-15m.xlsx"
+# Download the file from Dropbox
+dropbox_urls={
+"https://www.dropbox.com/scl/fi/ijbl4zheomb5wle86482z/AUDUSD-2000-2020-15m.xlsx?rlkey=sc4l1kz51afg4du4sv10066p5&dl=0",
+"https://www.dropbox.com/scl/fi/mhwbvqyqm22vukoh0v83f/CADUSD-2000-2020-15m.xlsx?rlkey=215orm9blc2d46kfkb94ha6p5&dl=0",
+"https://www.dropbox.com/scl/fi/8znnxec73av6ly9f8carj/CHFEUR-2000-2020-15m.xlsx?rlkey=zjxnm12677q0jx9m3g89iz3c2&dl=0",
+"https://www.dropbox.com/scl/fi/wcvf1e1upvl1pojw2bod1/CHFUSD-2000-2020-15m.xlsx?rlkey=wp3acbaddkvksbft85gezvx2j&dl=0",
+"https://www.dropbox.com/scl/fi/kf3zg6r2etlz43pib56gc/EURCHF-2000-2020-15m.xlsx?rlkey=ohbd3p1xiai27u3xank1oowxh&dl=0",
+"https://www.dropbox.com/scl/fi/gywb1vwcfjvz3wnvj2jm1/EURJPY-2000-2020-15m.xlsx?rlkey=6b3qqepgj79s2lg6dvx7lttvt&dl=0",
+"https://www.dropbox.com/scl/fi/us4bibv4k7w015v8is1q7/EURUSD-2000-2020-15m.xlsx?rlkey=9q9my2fw5kqaksid4bnmmjurp&dl=0",
+"https://www.dropbox.com/scl/fi/1ljbuff0lolq45lsvs4wc/JPYEUR-2000-2020-15m.xlsx?rlkey=f5h3cu916hyah4xcct8aihcgu&dl=0",
+"https://www.dropbox.com/scl/fi/dptirts54n7nb0yu1qyu8/JPYUSD-2000-2020-15m.xlsx?rlkey=ed2b70t4j9v4p5lgt1qfv6huk&dl=0",
+"https://www.dropbox.com/scl/fi/7s1g73v77iymv9g572fcg/USDAUD-2000-2020-15m.xlsx?rlkey=2ip6w36xy35hym3h92eai8eiu&dl=0",
+"https://www.dropbox.com/scl/fi/bpe7y8u95ve24hojpa4ku/USDCAD-2000-2020-15m.xlsx?rlkey=mir2kwb3po1pdf9ivybwbenf1&dl=0",
+"https://www.dropbox.com/scl/fi/6ckzcse9rhr6smg1w0hjd/USDCHF-2000-2020-15m.xlsx?rlkey=o3kekn02wbacptgmw9yr1w9zm&dl=0",
+"https://www.dropbox.com/scl/fi/nc76gz1ejzzvmehpla7ka/USDEUR-2000-2020-15m.xlsx?rlkey=bn7m7v5dy30ezhyguq138c0af&dl=0",
+"https://www.dropbox.com/scl/fi/zgmvgmnfpx515t20l9ih8/USDJPY-2000-2020-15m.xlsx?rlkey=2vygvj46jpa70nex6uejhnrln&dl=0"
+}
 
-]
-
-    
 # List of currency pairs
 currency_pairs = ["AUDUSD", "EURCHF", "EURJPY", "EURUSD", "USDCAD", "USDCHF",
                   "USDJPY", "USDAUD", "CHFEUR", "JPYEUR", "USDEUR", "CADUSD",
                   "CHFUSD", "JPYUSD"]
 
 # Load the data
-dataframes = load_data(file_paths)
+dataframes = load_data(dropbox_urls)
 
 # Clean the data
 for pair, df in zip(currency_pairs, dataframes):
@@ -118,7 +121,7 @@ if menu_id == "Home":
     
     
     # Load and display the Lottie animation
-    lottie_file = load_lottiefile("/Users/hassan/Desktop/animation_lmdj278y.json")
+    lottie_file = load_lottiefile("animation_lmdj278y.json")
     st_lottie(lottie_file, width=200, height=200)
 
 
@@ -687,7 +690,7 @@ elif menu_id == "Arbitrage Finder":
     find_arbitrage_opportunities(selected_path)
     
     # Load and display the Lottie animation
-    lottie_file = load_lottiefile("/Users/hassan/Desktop/animation_lmdkbh9e.json")
+    lottie_file = load_lottiefile("animation_lmdkbh9e.json")
     st_lottie(lottie_file, width=200, height=200)
 
 
